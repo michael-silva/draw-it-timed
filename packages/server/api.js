@@ -1,15 +1,15 @@
 const axios = require('axios')
 const express = require('express')
 
-const CLIENT_ID = process.env.PINTERST_CLIENT_ID
-const CLIENT_SECRET = process.env.PINTERST_CLIENT_SECRET
+const CLIENT_ID = process.env.PINTEREST_CLIENT_ID
+const CLIENT_SECRET = process.env.PINTEREST_CLIENT_SECRET
 
 const toB64 = (str) => {
     return Buffer.from(str).toString('base64')
 }
 
 const pinterestApi = {
-    getToken: (code) => {
+    getToken: (code, redirect_uri) => {
         const headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Basic ${toB64(`${CLIENT_ID}:${CLIENT_SECRET}`)}`
@@ -17,13 +17,13 @@ const pinterestApi = {
         const body = {
             code,
             grant_type:'authorization_code',
-            redirect_uri: 'http://localhost:3000/',
+            redirect_uri,
             
         }
         return axios.post('https://api.pinterest.com/v5/oauth/token', new URLSearchParams(body), { headers })
 
     },
-    refreshToken: (token) => {
+    refreshToken: (token, redirect_uri) => {
         const headers = {
             'Content-Type': 'application/x-www-form-urlencoded',
             'Authorization': `Basic ${toB64(`${CLIENT_ID}:${CLIENT_SECRET}`)}`
@@ -31,7 +31,7 @@ const pinterestApi = {
         const body = {
             refresh_token: token,
             grant_type:'refresh_token',
-            redirect_uri: 'http://localhost:3000/',
+            redirect_uri,
             
         }
         return axios.post('https://api.pinterest.com/v5/oauth/token', new URLSearchParams(body), { headers })
@@ -56,14 +56,14 @@ router.use((req, res, next) => {
 })
 
 router.get('/', (req, res) => {
-    res.send('Hello World!')
+    res.send({ CLIENT_ID, CLIENT_SECRET })
+    // res.send('Hello World!')
 })
 
 router.post('/token', async (req, res) => {
     try {
-        console.log(req.body)
-        const { code } = req.body
-        const { data } = await pinterestApi.getToken(code)
+        const { code, redirectURI } = req.body
+        const { data } = await pinterestApi.getToken(code, redirectURI)
         res.json(data)
     }
     catch (e) {
@@ -75,8 +75,8 @@ router.post('/token', async (req, res) => {
 
 router.post('/token/refresh', async (req, res) => {
     try {
-        const { token } = req.post
-        const { data } = await pinterestApi.refreshToken(token)
+        const { token, redirectURI } = req.post
+        const { data } = await pinterestApi.refreshToken(token, redirectURI)
         res.json(data)
     }
     catch (e) {

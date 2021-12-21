@@ -3,26 +3,27 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 const CLIENT_ID = '1474805'
+const API_URL = 'http://localhost:3001'
 const localApi = {
-    getToken: (code) => axios.post('http://localhost:3001/token', { code }),
-    refreshToken: (token) => axios.post('http://localhost:3001/token/refresh', { token }),
+    getToken: (code) => axios.post(`${API_URL}/token`, { code, redirectURI: window.location.href }),
+    refreshToken: (token) => axios.post(`${API_URL}/token/refresh`, { token, redirectURI: window.location.href }),
     getBoards: () => {
         const headers = { 
            Authorization: localStorage.getItem('token')
         }
-        return axios.get('http://localhost:3001/boards', { headers })
+        return axios.get(`${API_URL}/boards`, { headers })
     },
     getBoardPins: (boardId) => {
         const headers = { 
            Authorization: localStorage.getItem('token')
         }
-        return axios.get(`http://localhost:3001/boards/${boardId}/pins`, { headers })
+        return axios.get(`${API_URL}/boards/${boardId}/pins`, { headers })
     },
     getUserAccount: () => {
         const headers = { 
            Authorization: localStorage.getItem('token')
         }
-        return axios.get('http://localhost:3001/user', { headers })
+        return axios.get(`${API_URL}/user`, { headers })
     },
 }
 
