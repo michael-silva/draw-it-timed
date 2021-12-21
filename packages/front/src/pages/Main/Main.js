@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 
 const CLIENT_ID = '1474805'
-const API_URL = 'http://localhost:3001'
+const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001'
 const localApi = {
     getToken: (code) => axios.post(`${API_URL}/token`, { code, redirectURI: window.location.href }),
     refreshToken: (token) => axios.post(`${API_URL}/token/refresh`, { token, redirectURI: window.location.href }),

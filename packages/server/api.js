@@ -56,8 +56,7 @@ router.use((req, res, next) => {
 })
 
 router.get('/', (req, res) => {
-    res.send({ CLIENT_ID, CLIENT_SECRET })
-    // res.send('Hello World!')
+    res.send('Hello World!')
 })
 
 router.post('/token', async (req, res) => {
