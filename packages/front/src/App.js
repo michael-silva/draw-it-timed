@@ -3,6 +3,8 @@ import './App.css';
 import {BrowserRouter, Route, Routes, Link} from "react-router-dom";
 import { Terms } from './pages/Terms'
 import { Main } from './pages/Main'
+import { Timed } from './pages/Timed';
+import { Summary } from './pages/Summary';
 
 const isDevelop = process.env.NODE_ENV === 'development'
 
@@ -29,6 +31,8 @@ function App() {
       <main>
       <Routes>
           <Route path="/terms" element={<Terms />} />
+          <Route path="/timed" element={<Timed />} />
+          <Route path="/summary" element={<Summary />} />
           <Route path="/" element={<Main />} />
         </Routes>
       </main>
