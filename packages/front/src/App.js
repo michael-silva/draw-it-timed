@@ -1,43 +1,43 @@
-import logo from './logo.svg';
+import CssBaseline from '@mui/material/CssBaseline';
+import {BrowserRouter, Route, Routes } from "react-router-dom";
+import { createTheme, responsiveFontSizes, ThemeProvider } from '@mui/material/styles';
 import './App.css';
-import {BrowserRouter, Route, Routes, Link} from "react-router-dom";
 import { Terms } from './pages/Terms'
 import { Main } from './pages/Main'
-import { Timed } from './pages/Timed';
-import { Summary } from './pages/Summary';
+import { useState } from 'react';
+import { Topbar } from './components/Topbar';
+import { Auth } from './pages/Auth';
+import { Container } from '@mui/material';
+import { Box } from '@mui/system';
 
 const isDevelop = process.env.NODE_ENV === 'development'
+const darkTheme = responsiveFontSizes(createTheme({
+  palette: {
+    mode: 'dark',
+  },
+}));
+const lightTheme = responsiveFontSizes(createTheme());
+
+
 
 function App() {
+  const [darkMode, setDarkMode] = useState(false)
   return (
+    <ThemeProvider theme={darkMode ? darkTheme : lightTheme}>
+    <CssBaseline />
     <BrowserRouter basename={isDevelop ? '/' : process.env.PUBLIC_URL}>
-    <div className="App">
-      <header className="App-header">
-        <div className="App-title">
-        <img src={logo} className="App-logo" alt="logo" />
-        <h1>Draw it Timed!</h1>
-        </div>
-        <nav className="App-navbar">
-          <ul>
-            <li>
-              <Link to="/" className="App-link">Main</Link>
-            </li>
-            <li>
-              <Link to="/terms" className="App-link">Terms</Link>
-            </li>
-          </ul>
-        </nav>
-      </header>
-      <main>
+      <Topbar darkMode={darkMode} onChangeTheme={() => setDarkMode(mode => !mode)} />
+      <Container>
+      <Box sx={{ mt: 10 }}>
       <Routes>
-          <Route path="/terms" element={<Terms />} />
-          <Route path="/timed" element={<Timed />} />
-          <Route path="/summary" element={<Summary />} />
-          <Route path="/" element={<Main />} />
-        </Routes>
-      </main>
-    </div>
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/terms" element={<Terms />} />
+        <Route path="/" element={<Main />} />
+      </Routes>
+    </Box>
+    </Container>
     </BrowserRouter>
+    </ThemeProvider>
   );
 }
 

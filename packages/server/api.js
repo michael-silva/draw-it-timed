@@ -43,8 +43,8 @@ const pinterestApi = {
     getBoards: () => {
         return axios.get('https://api.pinterest.com/v5/boards')
     },
-    getBoardPins: (boardId) => {
-        return axios.get(`https://api.pinterest.com/v5/boards/${boardId}/pins`)
+    getBoardPins: (boardId, params) => {
+        return axios.get(`https://api.pinterest.com/v5/boards/${boardId}/pins`, { params })
     },
 }
 
@@ -114,7 +114,7 @@ router.get('/boards', async (req, res) => {
 
 router.get('/boards/:boardId/pins', async (req, res) => {
     try {
-        const { data } = await pinterestApi.getBoardPins(req.params.boardId)
+        const { data } = await pinterestApi.getBoardPins(req.params.boardId, req.query)
         res.json(data)
     }
     catch (e) {

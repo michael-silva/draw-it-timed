@@ -4,8 +4,8 @@
   "description": "This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).",
   "main": "index.js",
   "scripts": {
-    "lint": "lerna run lint --stream",
-    "start": "lerna run start --stream",
+    "lint": "lerna run lint --parallel",
+    "start": "lerna run start --parallel",
     "deploy:front": "lerna run deploy --scope draw-it-timed-front"
   },
   "repository": {
