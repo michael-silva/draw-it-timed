@@ -90,6 +90,12 @@ const Topbar = ({ darkMode, onChangeTheme, noTabs = false }) =>  {
     const classes = useStyles()
     const location = useLocation()
 
+    const handleLogoff = () => {
+      localStorage.removeItem('hash')
+      localStorage.removeItem('token')
+      window.location.reload()
+    }
+
   const handleChange = (event, value) => {
     setValue(value);
   };
@@ -175,6 +181,12 @@ const Topbar = ({ darkMode, onChangeTheme, noTabs = false }) =>  {
                             <ListItemText primary={item.label} />
                           </ListItem>
                         ))}
+                        <ListItem
+                            button
+                            onClick={handleLogoff}
+                          >
+                            <ListItemText primary="Log out" />
+                          </ListItem>
                       </List>
                     </SwipeableDrawer>
                     <Tabs
@@ -200,6 +212,11 @@ const Topbar = ({ darkMode, onChangeTheme, noTabs = false }) =>  {
                           label={item.label}
                         />
                       ))}
+                      <Tab
+                          classes={{ root: classes.tabItem }}
+                          label="Log out"
+                          onClick={handleLogoff}
+                        />
                       <Box ml="auto">
                       <FormGroup>
                           <FormControlLabel control={<Switch color="default" checked={darkMode} onChange={onChangeTheme} />} label="Dark" />
