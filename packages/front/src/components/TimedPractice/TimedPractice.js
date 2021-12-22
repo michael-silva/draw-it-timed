@@ -77,15 +77,15 @@ const TimedPractice = ({ pins, interval, random, images, onClose, onFinish }) =>
       </Button>}
     </Toolbar>
   </AppBar>
-        <Box sx={{ height: '90%', width: '100%' }}>
+        <Box sx={{ height: '90%', width: '100%', display: 'flex' }}>
         <img src={currentPin.media.images.originals.url} style={{ maxWidth: '100%', maxHeight: '100%', margin: 'auto', display: 'flex'}} />
         </Box>
-      <Typography sx={{ mx: 2, flex: 1 }} variant="h6" component="div">
+        <AppBar position="fixed" color="default" sx={{ top: 'auto', bottom: 0 }}>
+        <Typography sx={{ mx: 2, flex: 1 }} variant="h6" component="div">
         <span>{Math.floor(timeElapsed / 1000)}s / {interval / 1000}s</span>
         <LinearProgress variant="determinate" value={100 / interval * timeElapsed} />
         </Typography>
-        <Box sx={{ width: '100%' }}>
-        </Box>
+      </AppBar>
     </>
 }
 
