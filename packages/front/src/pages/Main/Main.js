@@ -1,6 +1,7 @@
 import { Alert, AppBar, Box, Button, ButtonGroup, Card, CardActions, CardContent, CardHeader, CardMedia, CircularProgress, Dialog, FormControlLabel, FormGroup, Grid, IconButton, ImageList, ImageListItem, Paper, Radio, Slide, Switch, Toolbar, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
-import CloseIcon from '@mui/icons-material/Close';
+import StarBorderIcon from '@mui/icons-material/StarBorder';
+import StarIcon from '@mui/icons-material/Star';
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import localApi from '../../utils/api'
 import { TimedPractice } from '../../components/TimedPractice';
@@ -26,7 +27,7 @@ function useOnScreen(ref) {
     return isIntersecting
   }
 
-const Board = ({id, name, description, onSelect, selected }) => {
+const Board = ({id, name, description, onSelect, selected, favored, onFavoredClick }) => {
     const [pins, setPins] = useState([])
     const ref = useRef()
     const isVisible = useOnScreen(ref)
@@ -48,10 +49,13 @@ const Board = ({id, name, description, onSelect, selected }) => {
 
     return   <Card ref={ref} sx={{ maxWidth: 345 }} onClick={() => onSelect(id)}>
       <CardHeader
-        action={
+        action={<>
+          <IconButton color="primary" aria-label="upload picture" component="span" onClick={onFavoredClick}>
+            {favored ? <StarIcon /> : <StarBorderIcon />}
+        </IconButton>
           <Radio checked={selected}
           onChange={() => onSelect(id)} />
-        }
+        </>}
         title={name}
         subheader={description}
       />
@@ -111,11 +115,26 @@ const CheckGroup = ({ value, onChange, options }) => {
 
 const BoardList = ({ onStartPractice }) => {
     const [boards, setBoards] = useState([])
+    const [favoreds, setFavoreds] = useState([])
     const [boardId, setBoardId] = useState(null)
     const [intervalValue, setIntervalValue] = useState(60)
     const [imagesValue, setImagesValue] = useState(20)
     const [checkedRandom, setCheckedRandom] = useState(false)
     const [hasError, setError] = useState(false)
+
+    const addToFavored = (index) => {
+      const tempBoards = [...boards]
+      const [ favored ] = tempBoards.splice(index, 1)
+      setBoards(tempBoards)
+      setFavoreds(current => [...current, favored])
+    }
+
+    const removeFromFavored = (index) => {
+      const tempFavoreds = [...favoreds]
+      const [board] = tempFavoreds.splice(index, 1)
+      setFavoreds(tempFavoreds)
+      setBoards(current => [...current, board])
+    }
 
     const handleSelect = (id) => {
       setBoardId(id)
@@ -149,7 +168,20 @@ const BoardList = ({ onStartPractice }) => {
         const fetchBoards = async () => {
             try {
                 const { data } = await localApi.getBoards()
-                setBoards(data.items)
+                const storageFavoreds = localStorage.getItem('favoreds') || []
+                let tempBoards = []
+                let tempFavoreds = []
+
+                data.items.forEach(item => {
+                  if (storageFavoreds.includes(item.id)) {
+                    tempFavoreds.push(item)
+                  }
+                  else {
+                    tempBoards.push(item)
+                  }
+                })
+                setBoards(tempBoards)
+                setFavoreds(tempFavoreds)
             }
             catch (e) {
                 console.log(e)
@@ -158,6 +190,11 @@ const BoardList = ({ onStartPractice }) => {
         }
         fetchBoards()
     }, [])
+
+    useEffect(() => {
+      if (boards.length === 0 && favoreds.length === 0) return
+      localStorage.setItem('favoreds', favoreds.map(f => f.id))
+    }, [favoreds])
 
     return  <Box sx={{ width: '100%', maxWidth: 2500 }}>
     <Typography variant="h1" component="div" gutterBottom>
@@ -186,7 +223,14 @@ const BoardList = ({ onStartPractice }) => {
     </Paper>
     <Box mt={2} >
     <Grid container spacing={2}>
-    {boards.map(board => <Grid  key={board.id} item><Board {...board} onSelect={handleSelect} selected={board.id === boardId} /></Grid>)}
+    {favoreds.map((board, index) => 
+    <Grid  key={board.id} item>
+      <Board {...board} onSelect={handleSelect} selected={board.id === boardId} favored onFavoredClick={() => removeFromFavored(index)} />
+    </Grid>)}
+    {boards.map((board, index) => 
+    <Grid  key={board.id} item>
+      <Board {...board} onSelect={handleSelect} selected={board.id === boardId} onFavoredClick={() => addToFavored(index)} />
+    </Grid>)}
     </Grid>
     </Box>
     </Box>
