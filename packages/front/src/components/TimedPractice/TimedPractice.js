@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close';
-import { useLocation, useNavigate } from 'react-router-dom'
 import { AppBar, Button, IconButton, LinearProgress, Toolbar, Typography } from '@mui/material';
 import { Box } from '@mui/system';
 
@@ -35,6 +34,11 @@ const TimedPractice = ({ pins, interval, random, images, onClose, onFinish }) =>
         setTimeElapsed(0)
     }
 
+    const handleStopClick = () => {
+      const current = remainingItems.splice(viewIndex, 1)[0]
+      onFinish([...completedItems, current])
+    }
+
     useEffect(() => {
         if (completedItems.length === totalItems || remainingItems.length === 0) {
             onFinish(completedItems)
@@ -47,14 +51,14 @@ const TimedPractice = ({ pins, interval, random, images, onClose, onFinish }) =>
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [totalItems, completedItems, remainingItems])
 
-
     useEffect(() => {
         if (timeElapsed >= interval) {
-            setTimeElapsed(0)
-            const current = remainingItems.splice(viewIndex, 1)[0]
-            setRemainingItems([...remainingItems])
-            setCompletedItems(items => [...items, current])
-            setViewIndex(c => pickIndex(remainingItems, -1, random))
+          
+      setTimeElapsed(0)
+      const current = remainingItems.splice(viewIndex, 1)[0]
+      setRemainingItems([...remainingItems])
+      setCompletedItems(items => [...items, current])
+      setViewIndex(c => pickIndex(remainingItems, -1, random))
         }
     }, [timeElapsed, interval, random, remainingItems, viewIndex])
 
@@ -72,13 +76,16 @@ const TimedPractice = ({ pins, interval, random, images, onClose, onFinish }) =>
       <Typography sx={{ ml: 2, flex: 1 }} variant="h6" component="div">
         Timed Practice (<span>{completedItems.length} / {totalItems}</span>)
       </Typography>
+      <Button  variant="contained" color="success" onClick={handleStopClick}>
+        Stop Session
+      </Button>
       {hasRemaining && <Button autoFocus color="inherit" onClick={handleSkipClick}>
         Skip
       </Button>}
     </Toolbar>
   </AppBar>
         <Box sx={{ height: '90%', width: '100%', display: 'flex' }}>
-        <img src={currentPin.media.images.originals.url} style={{ maxWidth: '100%', maxHeight: '100%', margin: 'auto', display: 'flex'}} />
+        <img src={currentPin?.media?.images?.originals?.url} style={{ maxWidth: '100%', maxHeight: '100%', margin: 'auto', display: 'flex'}} />
         </Box>
         <AppBar position="fixed" color="default" sx={{ top: 'auto', bottom: 0 }}>
         <Typography sx={{ mx: 2, flex: 1 }} variant="h6" component="div">

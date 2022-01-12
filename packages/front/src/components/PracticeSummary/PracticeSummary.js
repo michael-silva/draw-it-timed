@@ -1,13 +1,14 @@
-import { AppBar, Button, IconButton, ImageList, ImageListItem, Toolbar, Typography } from '@mui/material'
+import { AppBar, Box, Button, IconButton, ImageList, ImageListItem, Paper, Toolbar, Typography } from '@mui/material'
 import { useEffect, useMemo, useState } from 'react'
 import CloseIcon from '@mui/icons-material/Close';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
-import { useLocation, useNavigate } from 'react-router-dom'
+import { CheckGroup } from '../CheckGroup';
 
 
-const Summary = ({ pins, onClose }) => {
+const Summary = ({ pins, interval, onIntervalChange, onClose, onRedoClick }) => {
     const [viewIndex, setViewIndex] = useState(-1)
     const currentPin = viewIndex === -1 ? null : pins[viewIndex]
+    const intervalValue = interval / 1000
     
     const handleImageClick = (index) => {
         setViewIndex(index)
@@ -16,6 +17,11 @@ const Summary = ({ pins, onClose }) => {
     const handleCloseClick = (index) => {
         setViewIndex(-1)
     }
+
+    const handleIntervalChange = (interval) => {
+      onIntervalChange(interval * 1000)
+    }
+
     return <>
     <AppBar sx={{ position: 'relative' }}>
     <Toolbar>
@@ -42,8 +48,9 @@ const Summary = ({ pins, onClose }) => {
       </>}
     </Toolbar>
   </AppBar>
-        {currentPin && 
-        <img src={currentPin.media.images.originals.url} />}
+        {currentPin && <Box sx={{ height: '90%', width: '100%', display: 'flex' }}>
+        <img src={currentPin.media.images.originals.url} style={{ maxWidth: '100%', maxHeight: '100%', margin: 'auto', display: 'flex'}} />
+        </Box>}
       <ImageList variant="masonry" cols={3} gap={8}>
   {!currentPin && pins.map((item, index) => (
     <ImageListItem key={item.id}>
@@ -56,6 +63,18 @@ const Summary = ({ pins, onClose }) => {
     </ImageListItem>
   ))}
   </ImageList>
+
+    <Box sx={{ width: '90%', maxWidth: 500, margin: 2 }}>
+  <Paper elevation={3} style={{ padding: 24 }} >
+            <Typography>Select the Interval</Typography>
+            <CheckGroup options={[{ value: 30, label: '30s'}, { value: 60, label: '1m'}, { value: 120, label: '2m'} , { value: 180, label: '3m'}, { value: 300, label: '5m'} ]} value={intervalValue} onChange={handleIntervalChange} />
+      <Box mt={2}>
+      <Button variant="contained" color="success" onClick={onRedoClick} >
+        Re-Do Session
+      </Button>
+      </Box>
+      </Paper>
+      </Box>
     </>
 }
 

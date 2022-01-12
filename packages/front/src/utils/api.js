@@ -5,11 +5,11 @@ const REDIRECT_URI = `${process.env.REACT_APP_REDIRECT_URL || 'http://localhost:
 const localApi = {
     getToken: (code) => axios.post(`${API_URL}/token`, { code, redirectURI: REDIRECT_URI }),
     refreshToken: (token) => axios.post(`${API_URL}/token/refresh`, { token, redirectURI: REDIRECT_URI }),
-    getBoards: () => {
+    getBoards: (params) => {
         const headers = { 
            Authorization: localStorage.getItem('token')
         }
-        return axios.get(`${API_URL}/boards`, { headers })
+        return axios.get(`${API_URL}/boards`, { headers, params })
     },
     getBoardPins: (boardId, params) => {
         const headers = { 

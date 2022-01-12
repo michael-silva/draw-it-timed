@@ -1,11 +1,11 @@
-import { Alert, AppBar, Box, Button, ButtonGroup, Card, CardActions, CardContent, CardHeader, CardMedia, CircularProgress, Dialog, FormControlLabel, FormGroup, Grid, IconButton, ImageList, ImageListItem, Paper, Radio, Slide, Switch, Toolbar, Typography } from '@mui/material'
+import { Alert, Box, Button, Card, CardContent, CardHeader, CardMedia, CircularProgress, Dialog, FormControlLabel, FormGroup, Grid, IconButton, ImageList, ImageListItem, Paper, Radio, Slide, Switch, Toolbar, Typography } from '@mui/material'
 import React, { useEffect, useRef, useState } from 'react'
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
-import { useNavigate, useSearchParams } from 'react-router-dom'
 import localApi from '../../utils/api'
 import { TimedPractice } from '../../components/TimedPractice';
 import { PracticeSummary } from '../../components/PracticeSummary';
+import { CheckGroup } from '../../components/CheckGroup';
 
 const CLIENT_ID = '1474805'
 const REDIRECT_URI = `${process.env.REACT_APP_REDIRECT_URL || 'http://localhost:3000'}/auth`
@@ -100,19 +100,6 @@ const Login = () => {
     </Box>
 }
 
-const CheckGroup = ({ value, onChange, options }) => {
-    const handleChange = (index) => {
-        onChange(options[index].value)
-    }
-
-    return <ButtonGroup variant="outlined" aria-label="outlined button group">
-    {options.map((option, index) => {
-        const readOnly = option.value === value
-        return <Button key={option.value} readOnly={readOnly} variant={readOnly ? "contained" : "outlined"} onClick={() => handleChange(index)} >{option.label || option.value}</Button>
-    })}
-</ButtonGroup>
-}
-
 const BoardList = ({ onStartPractice }) => {
     const [boards, setBoards] = useState([])
     const [favoreds, setFavoreds] = useState([])
@@ -167,7 +154,7 @@ const BoardList = ({ onStartPractice }) => {
     useEffect(() => {
         const fetchBoards = async () => {
             try {
-                const { data } = await localApi.getBoards()
+                const { data } = await localApi.getBoards({ page_size: 100 })
                 const storageFavoreds = localStorage.getItem('favoreds') || []
                 let tempBoards = []
                 let tempFavoreds = []
@@ -198,7 +185,7 @@ const BoardList = ({ onStartPractice }) => {
 
     return  <Box sx={{ width: '100%', maxWidth: 2500 }}>
     <Typography variant="h1" component="div" gutterBottom>
-      Select your board
+      Pinterest Board Practice
     </Typography>
     <Paper elevation={3} >
     <Box sx={{ width: '100%', maxWidth: 1500, padding: 4 }}>
@@ -241,7 +228,7 @@ const Transition = React.forwardRef(function Transition(props, ref) {
 });
 
 
-const PracticeDialog = ({ boardId, interval, images, random, open, onClose }) => {
+const PracticeDialog = ({ boardId, interval, images, random, open, onClose, onIntervalChange }) => {
   const [loading, setLoading] = useState(true)
   const [completedPins, setCompletedPins] = useState([])
   const [pins, setPins] = useState([])
@@ -252,7 +239,16 @@ const PracticeDialog = ({ boardId, interval, images, random, open, onClose }) =>
       setLoading(true)
       const fetchPins = async () => {
           try {
-                  const { data } = await localApi.getBoardPins(boardId)
+                  const { data } = await localApi.getBoardPins(boardId, { page_size: random ? 100 : images })
+                  const { items } = data
+                  if (random) {
+                    let { bookmark } = data
+                    while(items.length < 1000 && bookmark) {
+                      const { data } = await localApi.getBoardPins(boardId, { page_size: 100, bookmark })
+                      items.concat(data.items)
+                      bookmark = data.bookmark
+                    }
+                  }
                   setPins(data.items)
                   setLoading(false)
           }
@@ -262,7 +258,7 @@ const PracticeDialog = ({ boardId, interval, images, random, open, onClose }) =>
           }
       }
     fetchPins()
-    }, [boardId])
+    }, [boardId, random, images])
 
 
     const handleFinished = (pins) => {
@@ -273,6 +269,11 @@ const PracticeDialog = ({ boardId, interval, images, random, open, onClose }) =>
       setCompletedPins([])
       onClose()
     }
+
+    const handleRedoClick = () => {
+      setPins(completedPins)
+      setCompletedPins([])
+    }
   return <Dialog
   fullScreen
   open={open}
@@ -281,7 +282,7 @@ const PracticeDialog = ({ boardId, interval, images, random, open, onClose }) =>
 >
   {loading && <CircularProgress />}
   {!loading && !hasFinished && <TimedPractice pins={pins} interval={interval} images={images} random={random} onClose={onClose} onFinish={handleFinished} />}
-  {!loading && hasFinished && <PracticeSummary pins={completedPins} onClose={handleClose} /> }
+  {!loading && hasFinished && <PracticeSummary pins={completedPins} onClose={handleClose} interval={interval} onIntervalChange={onIntervalChange} onRedoClick={handleRedoClick}/> }
   </Dialog>
 }
 
@@ -295,6 +296,10 @@ const Main = () => {
       setOpenDialog(true)
     }
 
+    const handleIntervalChange = (interval) => {
+      setPracticeConfig(config => ({ ...config, interval }))
+    }
+
     useEffect(() => {
         if (localStorage.getItem('token')) {
             setLogged(true)
@@ -303,7 +308,7 @@ const Main = () => {
 
     return  <>
     {isLogged ? <BoardList onStartPractice={handleStartPractice} /> : <Login />}
-    <PracticeDialog {...practiceConfig} open={isOpenDialog} onClose={() => setOpenDialog(false)} />
+    <PracticeDialog {...practiceConfig} onIntervalChange={handleIntervalChange} open={isOpenDialog} onClose={() => setOpenDialog(false)} />
     </>
 }
 
