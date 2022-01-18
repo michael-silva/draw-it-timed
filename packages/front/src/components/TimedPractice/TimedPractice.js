@@ -45,7 +45,7 @@ const TimedPractice = ({ pins, interval, random, images, onClose, onFinish }) =>
             return
         }
         const timer = setInterval(() => {
-            setTimeElapsed(time => time + 500)
+            setTimeElapsed(time => time + 300)
         }, 300)
         return () => clearTimeout(timer)
     // eslint-disable-next-line react-hooks/exhaustive-deps

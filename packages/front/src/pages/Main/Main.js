@@ -86,7 +86,7 @@ const Login = () => {
     const handleLoginClick = () => {
         const securityHash = Date.now()
         localStorage.setItem('hash', securityHash)
-        window.location.href = `https://www.pinterest.com/oauth/?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=user_accounts:read,boards:read,pins:read&state=${securityHash}`
+        window.location.href = `https://www.pinterest.com/oauth/?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=user_accounts:read,boards:read,boards:read_secret,pins:read,pins:read_secret&state=${securityHash}`
     }
 
     return  <Box sx={{ width: '100%', maxWidth: 500 }}>
