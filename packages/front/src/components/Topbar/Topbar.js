@@ -5,6 +5,7 @@ import { makeStyles } from '@mui/styles'
 import MenuIcon from "@mui/icons-material/Menu";
 
 import logo from '../../logo.svg';
+import session from "../../utils/session";
 
 const useStyles = makeStyles(theme => ({
   appBar: {
@@ -91,9 +92,7 @@ const Topbar = ({ darkMode, onChangeTheme, noTabs = false }) =>  {
     const location = useLocation()
 
     const handleLogoff = () => {
-      localStorage.removeItem('hash')
-      localStorage.removeItem('token')
-      window.location.reload()
+      session.clearSession()
     }
 
   const handleChange = (event, value) => {

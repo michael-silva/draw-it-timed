@@ -3,12 +3,26 @@ import React, { useEffect, useRef, useState } from 'react'
 import StarBorderIcon from '@mui/icons-material/StarBorder';
 import StarIcon from '@mui/icons-material/Star';
 import localApi from '../../utils/api'
+import session from '../../utils/session'
 import { TimedPractice } from '../../components/TimedPractice';
 import { PracticeSummary } from '../../components/PracticeSummary';
 import { CheckGroup } from '../../components/CheckGroup';
 
-const CLIENT_ID = '1474805'
-const REDIRECT_URI = `${process.env.REACT_APP_REDIRECT_URL || 'http://localhost:3000'}/auth`
+const errorHandler = (e) => {
+  const { status, data } = e.response || {}
+  if (status === 401) {
+    session.clearSession()
+  }
+  else if (status) {
+    console.log('status: ', status)
+    console.log('data: ', data)
+    alert('Request failed, see the console for more info')
+  }
+  else {
+    console.log(e)
+    alert('An generic error has ocurred')
+  }
+}
 
 function useOnScreen(ref) {
 
@@ -40,8 +54,7 @@ const Board = ({id, name, description, onSelect, selected, favored, onFavoredCli
                 setPins(data.items)
             }
         catch (e) {
-            // console.log(e)
-            // alert('Request failed!')
+          errorHandler(e)
         }
     }
     fetchPins()
@@ -84,9 +97,7 @@ const Board = ({id, name, description, onSelect, selected, favored, onFavoredCli
 
 const Login = () => {
     const handleLoginClick = () => {
-        const securityHash = Date.now()
-        localStorage.setItem('hash', securityHash)
-        window.location.href = `https://www.pinterest.com/oauth/?client_id=${CLIENT_ID}&redirect_uri=${REDIRECT_URI}&response_type=code&scope=user_accounts:read,boards:read,boards:read_secret,pins:read,pins:read_secret&state=${securityHash}`
+      session.createSession()
     }
 
     return  <Box sx={{ width: '100%', maxWidth: 500 }}>
@@ -171,8 +182,7 @@ const BoardList = ({ onStartPractice }) => {
                 setFavoreds(tempFavoreds)
             }
             catch (e) {
-                console.log(e)
-                alert('Request failed!')
+              errorHandler(e)
             }
         }
         fetchBoards()
@@ -253,8 +263,7 @@ const PracticeDialog = ({ boardId, interval, images, random, open, onClose, onIn
                   setLoading(false)
           }
           catch (e) {
-              // console.log(e)
-              // alert('Request failed!')
+            errorHandler(e)
           }
       }
     fetchPins()
